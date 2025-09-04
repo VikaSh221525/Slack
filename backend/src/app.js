@@ -1,7 +1,7 @@
 import express from "express";
 import { clerkMiddleware } from '@clerk/express';
 import { serve } from "inngest/express";
-import { functions, inngest } from "./config/inngest";
+import { functions, inngest } from "./config/inngest.js";
 
 const app = express();
 app.use(express.json());
