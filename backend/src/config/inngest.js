@@ -10,29 +10,48 @@ const syncUser = inngest.createFunction(
     { event: "clerk/user.created" },
     async ({ event, step }) => {
         try {
+            console.log("Starting user sync for event:", JSON.stringify(event.data, null, 2));
+            
             await connectDB();
+            console.log("Database connected successfully");
 
             const { id, email_addresses, first_name, last_name, image_url } = event.data;
 
             // Validate required fields
-            if (!id || !email_addresses || !email_addresses[0]?.email_address) {
-                throw new Error("Missing required user data");
+            if (!id) {
+                throw new Error("Missing user ID");
+            }
+            if (!email_addresses || !email_addresses[0]?.email_address) {
+                throw new Error("Missing email address");
             }
 
             const newUser = {
                 clerkId: id,
                 email: email_addresses[0].email_address,
-                name: `${first_name || ""} ${last_name || ""}`.trim(),
+                name: `${first_name || ""} ${last_name || ""}`.trim() || "Unknown User",
                 image: image_url || null
             };
+
+            console.log("Creating user with data:", JSON.stringify(newUser, null, 2));
+
+            // Check if user already exists
+            const existingUser = await User.findOne({ clerkId: id });
+            if (existingUser) {
+                console.log("User already exists:", existingUser.clerkId);
+                return { success: true, userId: existingUser.clerkId, message: "User already exists" };
+            }
 
             const createdUser = await User.create(newUser);
             console.log("User synced successfully:", createdUser.clerkId);
 
             return { success: true, userId: createdUser.clerkId };
         } catch (error) {
-            console.error("Error syncing user:", error);
-            throw error; // Re-throw to let Inngest handle retries
+            console.error("Detailed error syncing user:", {
+                message: error.message,
+                stack: error.stack,
+                eventData: event.data
+            });
+            throw error;
         }
     }
 );
