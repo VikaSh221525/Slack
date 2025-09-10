@@ -7,7 +7,7 @@ export const inngest = new Inngest({ id: "slack" });
 
 const syncUser = inngest.createFunction(
     { id: "sync-user" },
-    { event: "user.created" },
+    { event: "clerk/user.created" },
     async ({ event, step }) => {
         try {
             console.log("Starting user sync for event:", JSON.stringify(event.data, null, 2));
@@ -58,7 +58,7 @@ const syncUser = inngest.createFunction(
 
 const deleteUserFromDB = inngest.createFunction(
     { id: "delete-user-from-db" },
-    { event: "user.deleted" },
+    { event: "clerk/user.deleted" },
     async ({ event, step }) => {
         try {
             await connectDB();
