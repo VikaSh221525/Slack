@@ -11,7 +11,7 @@ const syncUser = inngest.createFunction(
     async ({ event, step }) => {
         try {
             console.log("Starting user sync for event:", JSON.stringify(event.data, null, 2));
-            
+
             await connectDB();
             console.log("Database connected successfully");
 
@@ -80,5 +80,15 @@ const deleteUserFromDB = inngest.createFunction(
     }
 );
 
+// Test function to verify Inngest is working
+const testFunction = inngest.createFunction(
+    { id: "test-function" },
+    { event: "test/ping" },
+    async ({ event }) => {
+        console.log("Test function triggered with:", event.data);
+        return { success: true, message: "Test function works!", timestamp: new Date().toISOString() };
+    }
+);
+
 // Create an empty array where we'll export future Inngest functions
-export const functions = [syncUser, deleteUserFromDB];
+export const functions = [syncUser, deleteUserFromDB, testFunction];
